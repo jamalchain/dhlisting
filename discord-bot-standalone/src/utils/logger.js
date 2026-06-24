@@ -12,18 +12,24 @@ async function sendLog(client, embed) {
 }
 
 function buildLog({ action, moderator, target, reason, strippedRoles }) {
-  const colors = { CAGE: 0xff8c00, STRIP: 0xff2222, UNCAGE: 0x00cc66 };
-  const icons = { CAGE: "🔒", STRIP: "⚡", UNCAGE: "🔓" };
+  const config = {
+    CAGE:   { color: 0xff8c00, icon: "🔒" },
+    UNCAGE: { color: 0x00cc66, icon: "🔓" },
+    STRIP:  { color: 0xff2222, icon: "⚡" },
+  };
+
+  const { color, icon } = config[action] ?? { color: 0x888888, icon: "📋" };
 
   const embed = new EmbedBuilder()
-    .setColor(colors[action] ?? 0x888888)
-    .setTitle(`${icons[action] ?? "📋"} ${action}`)
-    .addFields(
-      { name: "Target", value: `<@${target.id}> \`${target.tag}\``, inline: true },
-      { name: "Moderator", value: `<@${moderator.id}> \`${moderator.tag}\``, inline: true },
-      { name: "Reason", value: reason || "No reason provided" }
-    )
+    .setColor(color)
+    .setTitle(`${icon} ${action}`)
     .setThumbnail(target.displayAvatarURL({ dynamic: true }))
+    .addFields(
+      { name: "Target",     value: `<@${target.id}> · \`${target.username}\``,    inline: true },
+      { name: "Moderator",  value: `<@${moderator.id}> · \`${moderator.username}\``, inline: true },
+      { name: "Reason",     value: reason || "No reason provided" }
+    )
+    .setFooter({ text: "DH Listing Bot" })
     .setTimestamp();
 
   if (strippedRoles && strippedRoles.length > 0) {

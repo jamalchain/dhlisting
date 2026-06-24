@@ -1,19 +1,17 @@
 function isAuthorized(member) {
-  // Always allow the actual Discord server owner
+  // Server owner always has access
   if (member.guild && member.id === member.guild.ownerId) return true;
 
-  // Allow anyone listed in OWNER_IDS env
+  // Anyone listed in OWNER_IDS env var
   const ownerIds = (process.env.OWNER_IDS || "")
     .split(",")
     .map((id) => id.trim())
     .filter(Boolean);
   if (ownerIds.includes(member.id)) return true;
 
-  // Allow the whitelist role
-  const whitelistRole = process.env.WHITELIST_ROLE_NAME || "Bot Access";
-  return member.roles.cache.some(
-    (r) => r.name.toLowerCase() === whitelistRole.toLowerCase()
-  );
+  // Anyone with the whitelist role
+  const whitelistRole = (process.env.WHITELIST_ROLE_NAME || "Bot Access").toLowerCase();
+  return member.roles.cache.some((r) => r.name.toLowerCase() === whitelistRole);
 }
 
 async function denyAccess(interaction) {
@@ -21,8 +19,9 @@ async function denyAccess(interaction) {
     embeds: [
       {
         color: 0xff4444,
-        description:
-          "🚫 **Access Denied** — You need to be an owner or have the whitelist role.",
+        title: "🚫 Access Denied",
+        description: "You need to be an owner or have the **Bot Access** role to use this command.",
+        footer: { text: "DH Listing Bot" },
       },
     ],
     ephemeral: true,
